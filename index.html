@@ -30,7 +30,7 @@
                 const profile = await liff.getProfile();
                 const userId = profile.userId;
                 const displayName = profile.displayName;
-                const redirectUrl = `${WebinarUrl}?custom_field_1=${userId}&line_user_id=${userId}&nickname=${encodeURIComponent(displayName)}`;
+                const redirectUrl = `${WebinarUrl}?utm_source=${userId}&nickname=${encodeURIComponent(displayName)}`;
                 
                 window.location.replace(redirectUrl);
 
