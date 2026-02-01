@@ -7,7 +7,7 @@
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f5f5f5; }
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -16,6 +16,7 @@
 
     <script>
         const MyLiffId = '2009019246-jQOwLhSO';
+        const MakeWebhookUrl = 'https://hook.us2.make.com/stfbxp2f45tl523w4war61gepqhv19iy'; 
         const WebinarUrl = 'https://webinar.archiestudio.co/webinar/registration/69624d1a1249c7479a1126f7';
 
         async function main() {
@@ -28,11 +29,17 @@
                 }
 
                 const profile = await liff.getProfile();
-                const userId = profile.userId;
-                const displayName = profile.displayName;
-                const redirectUrl = `${WebinarUrl}?first_name=${encodeURIComponent(displayName)}&last_name=${userId}&email=&custom_field_1=${userId}`;
                 
-                window.location.replace(redirectUrl);
+                await fetch(MakeWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        line_id: profile.userId,
+                        nickname: profile.displayName
+                    })
+                });
+
+                window.location.replace(WebinarUrl);
 
             } catch (err) {
                 window.location.replace(WebinarUrl);
