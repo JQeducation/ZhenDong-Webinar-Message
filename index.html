@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>連動完成</title>
+    <title>報名成功</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
@@ -12,8 +12,11 @@
         p { color: #555; line-height: 1.6; margin: 0 0 25px 0; font-size: 15px; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn { display: inline-block; background-color: #06c755; color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        .btn:hover { background-color: #05a546; }
+        /* 按鈕樣式 */
+        .btn { display: inline-block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
+        .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
+        .btn-primary:hover { background-color: #05a546; }
+        .btn-secondary { background-color: #e0e0e0; color: #555; }
         .hidden { display: none; }
     </style>
 </head>
@@ -25,43 +28,56 @@
     </div>
 
     <div id="success" class="container hidden">
-        <h1>🎉 連動成功！</h1>
-        <p>親愛的 <b id="user-name"></b>，<br>我們已經確認您的報名。<br>請查看 LINE 聊天室收到的通知。</p>
-        <button class="btn" onclick="liff.closeWindow()">關閉視窗</button>
+        <h1>🎉 報名成功！</h1>
+        <p>親愛的 <b id="user-name"></b>，<br>感謝您的報名，資料已確認。</p>
+        
+        <a id="watch-btn" href="#" class="btn btn-primary">👉 點擊進入講座直播間</a>
+        
+        <p style="font-size:12px; color:#999; margin-top:15px;">( 連結也同步發送到您的 LINE 囉！ )</p>
+        
+        <button class="btn btn-secondary" onclick="liff.closeWindow()">關閉視窗</button>
     </div>
 
     <div id="error" class="container hidden">
         <h1 style="color:#ff4b4b;">❌ 發生錯誤</h1>
         <p>無法連線，請確認網路後重新點擊連結。</p>
-        <button class="btn" onclick="window.location.reload()" style="background-color:#666;">重新整理</button>
+        <button class="btn btn-secondary" onclick="window.location.reload()">重新整理</button>
     </div>
 
     <script>
-        // 👇👇👇 請務必修改這裡 👇👇👇
+        // 👇👇👇 請務必修改這兩行 👇👇👇
+        
         const MyLiffId = '2009019246-jQOwLhSO'; 
-        const MakeWebhookUrl = 'https://hook.us2.make.com/xy3s2t7qjlph7kngmdiayacvzwr524ce'; 
+        // 例如：'2009018332-wywdUELq'
+
+        const MakeWebhookUrl = 'https://hook.us2.make.com/nc4x17tiva11l10wqt5apuza5izmvl1w'; 
+        // 例如：'https://hook.us2.make.com/xy3s2t7q...24ce'
+
+        // 👆👆👆 修改上面就好，下面程式碼不要動 👆👆👆
+
 
         async function main() {
             const loadingDiv = document.getElementById('loading');
             const successDiv = document.getElementById('success');
             const errorDiv = document.getElementById('error');
             const nameSpan = document.getElementById('user-name');
+            const watchBtn = document.getElementById('watch-btn');
 
             try {
-                // 1. 初始化 LIFF
+                // 初始化 LIFF
                 await liff.init({ liffId: MyLiffId });
 
-                // 2. 檢查是否登入，沒登入就執行登入
+                // 檢查登入狀態
                 if (!liff.isLoggedIn()) {
                     liff.login();
                     return;
                 }
 
-                // 3. 取得使用者資料
+                // 取得使用者資料
                 const profile = await liff.getProfile();
                 nameSpan.textContent = profile.displayName;
 
-                // 4. 將 ID 傳送給 Make (Scenario A)
+                // 傳送資料給 Make，並等待回應
                 const response = await fetch(MakeWebhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -72,8 +88,21 @@
                     })
                 });
 
-                // 5. 判斷 Make 回傳結果
                 if (response.ok) {
+                    // 解析 Make 回傳的 JSON (裡面包含直播連結)
+                    const data = await response.json();
+                    
+                    // 如果有回傳 url，就把它設定給按鈕
+                    if (data.url) {
+                        watchBtn.href = data.url;
+                    } else {
+                        // 防呆機制：萬一沒抓到連結
+                        watchBtn.innerText = "連結已發送至 LINE";
+                        watchBtn.removeAttribute("href"); 
+                        watchBtn.classList.replace("btn-primary", "btn-secondary");
+                    }
+
+                    // 切換畫面
                     loadingDiv.classList.add('hidden');
                     successDiv.classList.remove('hidden');
                 } else {
