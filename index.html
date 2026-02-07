@@ -12,7 +12,6 @@
         p { color: #555; line-height: 1.6; margin: 0 0 25px 0; font-size: 15px; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* 按鈕樣式 */
         .btn { display: inline-block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
         .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
         .btn-primary:hover { background-color: #05a546; }
@@ -22,66 +21,60 @@
 </head>
 <body>
 
-    <div id="loading" class="container">
-        <div class="loader"></div>
-        <p>正在確認您的報名資料...</p>
-    </div>
-
+    <div id="loading" class="container"><div class="loader"></div><p>正在確認您的報名資料...</p></div>
     <div id="success" class="container hidden">
         <h1>🎉 報名成功！</h1>
         <p>親愛的 <b id="user-name"></b>，<br>資料已確認，歡迎加入直播！</p>
-        
         <a id="watch-btn" href="#" class="btn btn-primary">👉 點擊進入講座直播間</a>
-        
         <p style="font-size:12px; color:#999; margin-top:15px;">( 專屬連結已發送至您的 LINE )</p>
-        
         <button class="btn btn-secondary" onclick="liff.closeWindow()">關閉視窗</button>
     </div>
-
-    <div id="error" class="container hidden">
-        <h1 style="color:#ff4b4b;">❌ 發生錯誤</h1>
-        <p>無法連線，請確認網路後重新點擊連結。</p>
-        <button class="btn btn-secondary" onclick="window.location.reload()">重新整理</button>
-    </div>
+    <div id="error" class="container hidden"><h1 style="color:#ff4b4b;">❌ 發生錯誤</h1><p>無法連線，請確認網路後重新點擊連結。</p><button class="btn btn-secondary" onclick="window.location.reload()">重新整理</button></div>
 
     <script>
-        // 👇👇👇 你的設定值 (保持不變) 👇👇👇
+        // 👇👇👇 設定區 (確認ID無誤) 👇👇👇
         const MyLiffId = '2009019246-jQOwLhSO'; 
         const MakeWebhookUrl = 'https://hook.us2.make.com/nc4x17tiva11l10wqt5apuza5izmvl1w'; 
-        
-        // 直播間 ID (用於備案組裝)
         const WebinarID = '69624d1a1249c7479a1126f7';
         // 👆👆👆 設定結束 👆👆👆
 
         async function main() {
-            const loadingDiv = document.getElementById('loading');
-            const successDiv = document.getElementById('success');
-            const errorDiv = document.getElementById('error');
-            const nameSpan = document.getElementById('user-name');
-            const watchBtn = document.getElementById('watch-btn');
-
             try {
-                // 初始化 LIFF
                 await liff.init({ liffId: MyLiffId });
 
-                // 檢查登入狀態
+                const currentUrl = new URL(window.location.href);
+                const searchParams = currentUrl.searchParams;
+
+                // 1. 登入檢查與轉址
                 if (!liff.isLoggedIn()) {
-                    liff.login();
+                    liff.login({ redirectUri: window.location.href });
                     return;
                 }
 
-                // 取得 LINE 使用者資料
+                // --- 登入後執行 ---
                 const profile = await liff.getProfile();
                 
-                // 🌟 1. 抓取網址上的參數 (Method 2 核心)
-                const queryString = window.location.search.substring(1); // 抓取 ? 後面的整串字串
-                const urlParams = new URLSearchParams(window.location.search);
-                const userFirstName = urlParams.get('first_name'); // 單獨抓名字用來顯示
+                // 2. 🌟 關鍵修改：嚴格按照指定順序排列 🌟
+                // 順序：t -> r -> first_name -> email -> phone_number
+                const allowedKeys = ['t', 'r', 'first_name', 'email', 'phone_number'];
+                
+                const usefulParams = new URLSearchParams();
 
-                // 優先顯示報名表的真實姓名，沒有才用 LINE 暱稱
-                nameSpan.textContent = userFirstName || profile.displayName;
+                // 依照上面的順序，一個一個把參數抓進來 (如果存在的話)
+                for (const key of allowedKeys) {
+                    if (searchParams.has(key)) {
+                        usefulParams.append(key, searchParams.get(key));
+                    }
+                }
+                
+                // 3. 產生最終字串 (例如: t=...&r=...&first_name=...)
+                const finalQueryString = usefulParams.toString();
 
-                // 🌟 2. 傳送資料給 Make (包含完整的 query_string)
+                // 顯示名字
+                const userFirstName = usefulParams.get('first_name');
+                document.getElementById('user-name').textContent = userFirstName || profile.displayName;
+
+                // 4. 傳送給 Make
                 const response = await fetch(MakeWebhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -89,43 +82,35 @@
                         line_id: profile.userId,
                         nickname: profile.displayName,
                         picture: profile.pictureUrl,
-                        // 👇 這裡就是方法二的關鍵：直接把整串參數丟給 Make
-                        query_string: queryString 
+                        // 👇 這串現在會是完美的順序
+                        query_string: finalQueryString 
                     })
                 });
 
                 if (response.ok) {
                     const data = await response.json();
                     
-                    // 🌟 3. 設定按鈕連結
                     if (data.url) {
-                        // 優先使用 Make 回傳的完美連結
-                        watchBtn.href = data.url;
+                        document.getElementById('watch-btn').href = data.url;
                     } else {
-                        // ⚠️ 防呆備案：萬一 Make 沒回傳，前端自己組裝
-                        // 只要有 query_string，我們就能組出免登入連結
-                        if (queryString) {
-                            watchBtn.href = `https://webinar.archiestudio.co/webinar/watch/${WebinarID}?${queryString}`;
+                        // 備案組裝
+                        if (finalQueryString) {
+                            document.getElementById('watch-btn').href = `https://webinar.archiestudio.co/webinar/watch/${WebinarID}?${finalQueryString}`;
                         } else {
-                            // 最慘情況：只有登入頁連結
-                            watchBtn.href = `https://webinar.archiestudio.co/webinar/login/${WebinarID}`;
+                            document.getElementById('watch-btn').href = `https://webinar.archiestudio.co/webinar/login/${WebinarID}`;
                         }
                     }
 
-                    // 切換畫面
-                    loadingDiv.classList.add('hidden');
-                    successDiv.classList.remove('hidden');
-                } else {
-                    throw new Error('Make Response Error');
-                }
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('success').classList.remove('hidden');
+                } else { throw new Error('Make Response Error'); }
 
             } catch (err) {
-                console.error('Error:', err);
-                loadingDiv.classList.add('hidden');
-                errorDiv.classList.remove('hidden');
+                console.error(err);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
             }
         }
-
         main();
     </script>
 </body>
