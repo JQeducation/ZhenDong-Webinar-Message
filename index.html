@@ -29,11 +29,11 @@
 
     <div id="success" class="container hidden">
         <h1>🎉 報名成功！</h1>
-        <p>親愛的 <b id="user-name"></b>，<br>感謝您的報名，資料已確認。</p>
+        <p>親愛的 <b id="user-name"></b>，<br>資料已確認，歡迎加入直播！</p>
         
         <a id="watch-btn" href="#" class="btn btn-primary">👉 點擊進入講座直播間</a>
         
-        <p style="font-size:12px; color:#999; margin-top:15px;">( 連結也同步發送到您的 LINE 囉！ )</p>
+        <p style="font-size:12px; color:#999; margin-top:15px;">( 專屬連結已發送至您的 LINE )</p>
         
         <button class="btn btn-secondary" onclick="liff.closeWindow()">關閉視窗</button>
     </div>
@@ -45,16 +45,13 @@
     </div>
 
     <script>
-        // 👇👇👇 請務必修改這兩行 👇👇👇
-        
+        // 👇👇👇 你的設定值 (保持不變) 👇👇👇
         const MyLiffId = '2009019246-jQOwLhSO'; 
-        // 例如：'2009018332-wywdUELq'
-
         const MakeWebhookUrl = 'https://hook.us2.make.com/nc4x17tiva11l10wqt5apuza5izmvl1w'; 
-        // 例如：'https://hook.us2.make.com/xy3s2t7q...24ce'
-
-        // 👆👆👆 修改上面就好，下面程式碼不要動 👆👆👆
-
+        
+        // 直播間 ID (用於備案組裝)
+        const WebinarID = '69624d1a1249c7479a1126f7';
+        // 👆👆👆 設定結束 👆👆👆
 
         async function main() {
             const loadingDiv = document.getElementById('loading');
@@ -73,33 +70,46 @@
                     return;
                 }
 
-                // 取得使用者資料
+                // 取得 LINE 使用者資料
                 const profile = await liff.getProfile();
-                nameSpan.textContent = profile.displayName;
+                
+                // 🌟 1. 抓取網址上的參數 (Method 2 核心)
+                const queryString = window.location.search.substring(1); // 抓取 ? 後面的整串字串
+                const urlParams = new URLSearchParams(window.location.search);
+                const userFirstName = urlParams.get('first_name'); // 單獨抓名字用來顯示
 
-                // 傳送資料給 Make，並等待回應
+                // 優先顯示報名表的真實姓名，沒有才用 LINE 暱稱
+                nameSpan.textContent = userFirstName || profile.displayName;
+
+                // 🌟 2. 傳送資料給 Make (包含完整的 query_string)
                 const response = await fetch(MakeWebhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         line_id: profile.userId,
                         nickname: profile.displayName,
-                        picture: profile.pictureUrl
+                        picture: profile.pictureUrl,
+                        // 👇 這裡就是方法二的關鍵：直接把整串參數丟給 Make
+                        query_string: queryString 
                     })
                 });
 
                 if (response.ok) {
-                    // 解析 Make 回傳的 JSON (裡面包含直播連結)
                     const data = await response.json();
                     
-                    // 如果有回傳 url，就把它設定給按鈕
+                    // 🌟 3. 設定按鈕連結
                     if (data.url) {
+                        // 優先使用 Make 回傳的完美連結
                         watchBtn.href = data.url;
                     } else {
-                        // 防呆機制：萬一沒抓到連結
-                        watchBtn.innerText = "連結已發送至 LINE";
-                        watchBtn.removeAttribute("href"); 
-                        watchBtn.classList.replace("btn-primary", "btn-secondary");
+                        // ⚠️ 防呆備案：萬一 Make 沒回傳，前端自己組裝
+                        // 只要有 query_string，我們就能組出免登入連結
+                        if (queryString) {
+                            watchBtn.href = `https://webinar.archiestudio.co/webinar/watch/${WebinarID}?${queryString}`;
+                        } else {
+                            // 最慘情況：只有登入頁連結
+                            watchBtn.href = `https://webinar.archiestudio.co/webinar/login/${WebinarID}`;
+                        }
                     }
 
                     // 切換畫面
