@@ -3,158 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>報名資料確認中</title>
+    <title>正在為您跳轉至官方 LINE...</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
-        .container { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px; width: 100%; }
-        h1 { color: #06c755; margin: 0 0 15px 0; font-size: 24px; }
-        p { color: #555; line-height: 1.6; margin: 0 0 25px 0; font-size: 15px; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f9f9f9; }
+        .container { text-align: center; padding: 20px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn { display: inline-block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
-        .btn-primary:hover { background-color: #05a546; }
-        .btn-secondary { background-color: #e0e0e0; color: #555; }
-        .hidden { display: none; }
+        p { color: #555; font-size: 16px; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="loader"></div>
+        <p>正在為您準備講座連結，請稍候...</p>
+    </div>
 
-<div id="loading" class="container">
-    <div class="loader"></div>
-    <p style="font-size: 18px; font-weight: bold; margin-top: 15px;">正在為您生成專屬直播連結...</p>
-    <p style="color: #ff4b4b; font-weight: bold; margin-top: 10px; line-height: 1.5;">
-        💡 溫馨提醒：請勿關閉本網頁！<br>
-        授權添加官方 LINE，即可獲取「專屬直播連結」，<br>
-        並在講座結束後，領取「會考獨家好禮」
-    </p>
-</div>
+    <script>
+        // --- 🚩 設定區 🚩 ---
+        const MyLiffId = '2009771736-ooOyR8hn'; // 你的 GitHub 專用 LIFF ID
+        const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; // Step 2 的 Webhook
+        const Super8Link = 'https://s.no8.io/link/channels/oNIint5Dor'; // 你的 Super8 超連結
+        // --- 🚩 設定結束 🚩 ---
 
-<div id="success" class="container hidden">
-    <h1>🎉 報名成功！</h1>
-    <p>親愛的 <b id="user-name"></b>，<br>資料已確認，歡迎準時加入直播！</p>
-    
-    <button id="super-btn" class="btn btn-primary">💬 前往官方 LINE 確認連結</button>
-    
-    <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 10px; margin-bottom: 25px; line-height: 1.5;">
-        專屬直播連結已發送給您<br>講座開始時將通過 LINE 提醒！
-    </p>
+        async function main() {
+            try {
+                // 1. 初始化 LIFF
+                await liff.init({ liffId: MyLiffId });
 
-    <a id="watch-btn" href="#" class="btn btn-secondary">👉 點擊進入講座直播間</a>
-    
-    <p style="font-size: 12px; color: #999; margin-top: 10px;">( 時間到了才能進入唷！ )</p>
-</div>
-
-<div id="success-alt" class="container hidden">
-    <h1>🎉 報名成功！</h1>
-    <p>您好 <b id="user-name-alt"></b>，<br>您的專屬直播連結已準備好！</p>
-    
-    <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 10px; margin-bottom: 25px; line-height: 1.5;">
-        ( 由於系統發送繁忙，請直接點擊下方按鈕領取連結 )
-    </p>
-
-    <a id="watch-btn-alt" href="#" class="btn btn-primary">👉 點擊領取專屬直播連結</a>
-    
-    <button class="btn btn-secondary" style="margin-top: 15px;" onclick="window.location.href='https://lin.ee/ZMowQJg'">💬 歡迎加入官方 LINE 了解更多資訊</button>
-</div>
-
-<div id="error" class="container hidden">
-    <h1 style="color:#ff4b4b;">❌ 發生錯誤</h1>
-    <p style="line-height: 1.6; margin-bottom: 20px;">
-        抱歉，系統連線似乎遇到問題 😰<br>
-        請點擊下方按鈕加入官方 LINE，<br>
-        並<strong style="color: #ff4b4b;">將此畫面截圖並回傳給客服</strong>，<br>
-        我們將為您手動處理報名與發送連結！
-    </p>
-    <button class="btn btn-primary" onclick="window.location.href='https://lin.ee/ZMowQJg'">💬 聯繫官方 LINE 協助處理</button>
-</div>
-
-<script>
-    // 👇👇👇 設定區 👇👇👇
-    
-    const MyLiffId = '2009771736-ooOyR8hn'; // 請填入你的 LIFF ID
-    
-    // 🚩【標註：Make.com Webhook 寫在這裡】
-    const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; 
-    
-    // 🚩【標註：Super8 Superlink 寫在這裡】
-    const Super8Link = 'https://s.no8.io/link/channels/oNIint5Dor'; 
-
-    const WebinarID = '69624d1a1249c7479a1126f7';
-    // 👆👆👆 設定結束 👆👆👆
-
-    async function main() {
-        try {
-            await liff.init({ liffId: MyLiffId });
-
-            const currentUrl = new URL(window.location.href);
-            const searchParams = currentUrl.searchParams;
-
-            if (!liff.isLoggedIn()) {
-                liff.login({ redirectUri: window.location.href });
-                return;
-            }
-
-            const profile = await liff.getProfile();
-            const allowedKeys = ['t', 'r', 'first_name', 'email', 'phone_number'];
-            const usefulParams = new URLSearchParams();
-
-            for (const key of allowedKeys) {
-                if (searchParams.has(key)) {
-                    usefulParams.append(key, searchParams.get(key));
+                // 2. 檢查是否登入
+                if (!liff.isLoggedIn()) {
+                    liff.login({ redirectUri: window.location.href });
+                    return;
                 }
+
+                // 3. 抓取 LINE Profile
+                const profile = await liff.getProfile();
+
+                // 4. 從網址列抓取 Email 參數
+                const searchParams = new URLSearchParams(window.location.search);
+                const userEmail = searchParams.get('email');
+
+                // 5. 將資料傳送給 Make Step 2
+                // 我們使用 fetch 發送 POST 請求
+                await fetch(MakeWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'no-cors', // 避免 CORS 報錯阻礙跳轉
+                    body: JSON.stringify({
+                        line_id: profile.userId,
+                        email: userEmail,
+                        display_name: profile.displayName,
+                        source: "github_redirect"
+                    })
+                });
+
+                // 6. 成功傳送後，立刻跳轉到 Superlink
+                // 延遲 500ms 確保請求已發出
+                setTimeout(() => {
+                    window.location.href = Super8Link;
+                }, 500);
+
+            } catch (error) {
+                console.error('發生錯誤:', error);
+                // 即使出錯也嘗試跳轉，避免使用者卡住
+                window.location.href = Super8Link;
             }
-            
-            const finalQueryString = usefulParams.toString();
-            const userFirstName = usefulParams.get('first_name');
-            document.getElementById('user-name').textContent = userFirstName || profile.displayName;
-
-            // 傳送給 Make
-            const response = await fetch(MakeWebhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    line_id: profile.userId,
-                    nickname: profile.displayName,
-                    picture: profile.pictureUrl,
-                    query_string: finalQueryString 
-                })
-            });
-
-            if (response.ok) {
-                const data = await response.json(); 
-                document.getElementById('loading').classList.add('hidden');
-
-                if (data.status === "line_failed") {
-                    document.getElementById('success-alt').classList.remove('hidden');
-                    document.title = "🎉 報名成功！";
-                    document.getElementById('user-name-alt').innerText = liff.getDecodedIDToken().name; 
-                    document.getElementById('watch-btn-alt').href = data.url; 
-                } else {
-                    document.getElementById('success').classList.remove('hidden');
-                    document.title = "🎉 報名成功！";
-                    document.getElementById('user-name').innerText = liff.getDecodedIDToken().name; 
-                    
-                    // 設定主按鈕前往 Superlink
-                    const superBtn = document.getElementById('super-btn');
-                    superBtn.onclick = () => { window.location.href = Super8Link; };
-
-                    // 設定直播連結
-                    document.getElementById('watch-btn').href = data.url; 
-                }
-            } else {
-                throw new Error('Make Response Error'); 
-            }
-
-        } catch (err) {
-            console.error(err);
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('error').classList.remove('hidden');
-            document.title = "❌ 發生錯誤";
         }
-    }
-    main();
-</script>
+
+        // 啟動執行
+        main();
+    </script>
 </body>
 </html>
