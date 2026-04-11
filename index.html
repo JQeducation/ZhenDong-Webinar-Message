@@ -3,52 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在跳轉至官方 LINE...</title>
+    <title>正在為您跳轉至官方 LINE...</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { 
-            font-family: -apple-system, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-color: #06c755; /* LINE 綠色 */
-            color: white;
-        }
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f9f9f9; }
         .container { text-align: center; padding: 20px; }
-        .loader { 
-            border: 4px solid rgba(255,255,255,0.3); 
-            border-top: 4px solid #ffffff; 
-            border-radius: 50%; 
-            width: 40px; 
-            height: 40px; 
-            animation: spin 1s linear infinite; 
-            margin: 0 auto 20px; 
-        }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        p { font-size: 18px; font-weight: 500; letter-spacing: 1px; }
+        p { color: #555; font-size: 16px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="loader"></div>
-        <p>正在為您準備講座連結...</p>
+        <p>正在為您準備講座連結，請稍候...</p>
     </div>
 
     <script>
         // --- 🚩 設定區 🚩 ---
         const MyLiffId = '2009771736-ooOyR8hn'; // 你的 GitHub 專用 LIFF ID
-        const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; // Step 2 Webhook
+        const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; // Step 2 的 Webhook
         const Super8Link = 'https://s.no8.io/link/channels/oNIint5Dor'; // 你的 Super8 超連結
         // --- 🚩 設定結束 🚩 ---
 
-        let isProcessing = false;
-
         async function main() {
-            // 避免重複執行
-            if (isProcessing) return;
-
             try {
                 // 1. 初始化 LIFF
                 await liff.init({ liffId: MyLiffId });
@@ -59,41 +37,42 @@
                     return;
                 }
 
-                // 標記處理中
-                isProcessing = true;
-
                 // 3. 抓取 LINE Profile
                 const profile = await liff.getProfile();
 
-                // 4. 解析網址參數
+                // 4. 從網址列抓取 Email 參數
                 const searchParams = new URLSearchParams(window.location.search);
-                const rawEmail = searchParams.get('email');
+                const userEmail = searchParams.get('email');
 
-                // 5. 檢查 Email 是否有效 (排除空值與 WebinarKit 原始標籤)
-                // 如果抓不到正確 Email，我們直接跳轉到 Superlink，不傳資料給 Make
-                if (!rawEmail || rawEmail === '{email}' || rawEmail.trim() === '') {
-                    console.log("未偵測到有效 Email 參數，直接導向 Superlink");
-                    window.location.replace(Super8Link);
-                    return;
-                }
-
-                // 6. 傳送資料給 Make Step 2
-                // 使用 no-cors 模式確保即使跨網域也能在閃退前發出請求
+                // 5. 將資料傳送給 Make Step 2
+                // 我們使用 fetch 發送 POST 請求
                 await fetch(MakeWebhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    mode: 'no-cors',
+                    mode: 'no-cors', // 避免 CORS 報錯阻礙跳轉
                     body: JSON.stringify({
                         line_id: profile.userId,
-                        email: rawEmail,
+                        email: userEmail,
                         display_name: profile.displayName,
-                        timestamp: new Date().toISOString()
+                        source: "github_redirect"
                     })
                 });
 
-                // 7. 延遲極短時間後立刻跳轉
+                // 6. 成功傳送後，立刻跳轉到 Superlink
+                // 延遲 500ms 確保請求已發出
                 setTimeout(() => {
-                    window.location.replace(Super8Link);
-                }, 300);
+                    window.location.href = Super8Link;
+                }, 500);
 
             } catch (error) {
+                console.error('發生錯誤:', error);
+                // 即使出錯也嘗試跳轉，避免使用者卡住
+                window.location.href = Super8Link;
+            }
+        }
+
+        // 啟動執行
+        main();
+    </script>
+</body>
+</html>
