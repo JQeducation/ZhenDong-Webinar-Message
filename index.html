@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>報名成功</title>
+    <title>報名資料確認中</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         body { font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
@@ -21,21 +21,59 @@
 </head>
 <body>
 
-    <div id="loading" class="container"><div class="loader"></div><p>正在確認您的報名資料...</p></div>
-    <div id="success" class="container hidden">
-        <h1>🎉 報名成功！</h1>
-        <p>親愛的 <b id="user-name"></b>，<br>資料已確認，歡迎加入直播！</p>
-        <a id="watch-btn" href="#" class="btn btn-primary">👉 點擊進入講座直播間</a>
-        <p style="font-size:12px; color:#999; margin-top:15px;">( 專屬連結已發送至您的 LINE )</p>
-        <button class="btn btn-secondary" onclick="liff.closeWindow()">關閉視窗</button>
-    </div>
-    <div id="error" class="container hidden"><h1 style="color:#ff4b4b;">❌ 發生錯誤</h1><p>無法連線，請確認網路後重新點擊連結。</p><button class="btn btn-secondary" onclick="window.location.reload()">重新整理</button></div>
+    <div id="loading" class="container">
+    <div class="loader"></div>
+    <p style="font-size: 18px; font-weight: bold; margin-top: 15px;">正在為您生成專屬直播連結...</p>
+    <p style="color: #ff4b4b; font-weight: bold; margin-top: 10px; line-height: 1.5;">
+        💡 溫馨提醒：請勿關閉本網頁！<br>
+        授權添加官方 LINE，即可獲取「專屬直播連結」，<br>
+        並在講座結束後，領取「會考獨家好禮」
+    </p>
+    </p>
+</div>
+<div id="success" class="container hidden">
+    <h1>🎉 報名成功！</h1>
+    <p>親愛的 <b id="user-name"></b>，<br>資料已確認，歡迎準時加入直播！</p>
+    
+    <button class="btn btn-primary" onclick="window.location.href='https://lin.ee/ZMowQJg'">💬 前往官方 LINE 確認連結</button>
+    
+    <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 10px; margin-bottom: 25px; line-height: 1.5;">
+        專屬直播連結已發送給您<br>講座開始時將通過 LINE 提醒！
+    </p>
 
+    <a id="watch-btn" href="#" class="btn btn-secondary">👉 點擊進入講座直播間</a>
+    
+   <p style="font-size: 12px; color: #999; margin-top: 10px;">
+            ( 時間到了才能進入唷！ )
+        </p>
+    </div> <div id="success-alt" class="container hidden">
+        <h1>🎉 報名成功！</h1>
+        <p>您好 <b id="user-name-alt"></b>，<br>您的專屬直播連結已準備好！</p>
+        
+        <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 10px; margin-bottom: 25px; line-height: 1.5;">
+            ( 由於系統發送繁忙，請直接點擊下方按鈕領取連結 )
+        </p>
+
+        <a id="watch-btn-alt" href="#" class="btn btn-primary">👉 點擊領取專屬直播連結</a>
+        
+        <button class="btn btn-secondary" style="margin-top: 15px;" onclick="window.location.href='https://lin.ee/ZMowQJg'">💬 歡迎加入官方 LINE 了解更多資訊</button>
+</div>
+    <div id="error" class="container hidden">
+    <h1 style="color:#ff4b4b;">❌ 發生錯誤</h1>
+    <p style="line-height: 1.6; margin-bottom: 20px;">
+        抱歉，系統連線似乎遇到問題 😰<br>
+        請點擊下方按鈕加入官方 LINE，<br>
+        並<strong style="color: #ff4b4b;">將此畫面截圖並回傳給客服</strong>，<br>
+        我們將為您手動處理報名與發送連結！
+    </p>
+    <button class="btn btn-primary" onclick="window.location.href='https://lin.ee/ZMowQJg'">💬 聯繫官方 LINE 協助處理</button>
+</div>
+</div>
     <script>
         // 👇👇👇 設定區 (確認ID無誤) 👇👇👇
-        const MyLiffId = '2009019246-jQOwLhSO'; 
-        const MakeWebhookUrl = 'https://hook.us2.make.com/nc4x17tiva11l10wqt5apuza5izmvl1w'; 
-        const WebinarID = '69624d1a1249c7479a1126f7';
+        const MyLiffId = ''; 
+        const MakeWebhookUrl = ''; 
+        const WebinarID = '696f0867a8416e192c4c1c7e';
         // 👆👆👆 設定結束 👆👆👆
 
         async function main() {
@@ -87,28 +125,38 @@
                     })
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.url) {
-                        document.getElementById('watch-btn').href = data.url;
-                    } else {
-                        // 備案組裝
-                        if (finalQueryString) {
-                            document.getElementById('watch-btn').href = `https://webinar.archiestudio.co/webinar/watch/${WebinarID}?${finalQueryString}`;
-                        } else {
-                            document.getElementById('watch-btn').href = `https://webinar.archiestudio.co/webinar/login/${WebinarID}`;
-                        }
-                    }
+if (response.ok) {
+            const data = await response.json(); 
+            document.getElementById('loading').classList.add('hidden');
 
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('success').classList.remove('hidden');
-                } else { throw new Error('Make Response Error'); }
+            if (data.status === "line_failed") {
+                // 🚨 啟動 Plan B：收到 LINE 額度耗盡的暗號
+                document.getElementById('success-alt').classList.remove('hidden');
+                document.title = "🎉 報名成功！";
+                
+                // 填入名字與備用按鈕網址
+                document.getElementById('user-name-alt').innerText = liff.getDecodedIDToken().name; 
+                document.getElementById('watch-btn-alt').href = data.url; 
+
+            } else {
+                // ✅ 正常情況：LINE 沒問題，走原本的路線
+                document.getElementById('success').classList.remove('hidden');
+                document.title = "🎉 報名成功！";
+                
+                // 填入名字與正常按鈕網址
+                document.getElementById('user-name').innerText = liff.getDecodedIDToken().name; 
+                document.getElementById('watch-btn').href = data.url; 
+            }
+        } else {
+            // 這是給 Make 真的完全當機 (點數耗盡) 用的防護網
+            throw new Error('Make Response Error'); 
+        }
 
             } catch (err) {
                 console.error(err);
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('error').classList.remove('hidden');
+                document.title = "❌ 發生錯誤";
             }
         }
         main();
