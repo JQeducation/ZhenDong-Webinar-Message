@@ -43,26 +43,22 @@
                 const searchParams = new URLSearchParams(window.location.search);
                 const userEmail = searchParams.get('email');
 
-                // 核心改動：等待 fetch 完成，並移除 no-cors
-                await fetch(MakeWebhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        line_id: profile.userId,
-                        email: userEmail,
-                        display_name: profile.displayName,
-                        source: "github_redirect"
-                    })
+                // 🚩 改用 URL 參數格式傳送 (最穩定，免去 JSON 解析煩惱)
+                const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail || '')}&display_name=${encodeURIComponent(profile.displayName)}`;
+
+                // 使用 GET 請求發送，並加上 no-cors 保證不被攔截
+                await fetch(finalUrl, { 
+                    method: 'GET', 
+                    mode: 'no-cors' 
                 });
 
-                // 資料確定發出後，稍停 500ms 讓伺服器反應，然後跳轉
+                // 稍停 500ms 確保請求已發出，然後跳轉
                 setTimeout(() => {
                     window.location.replace(Super8Link);
                 }, 500);
 
             } catch (error) {
                 console.error('發生錯誤:', error);
-                // 出錯時保底跳轉
                 window.location.replace(Super8Link);
             }
         }
