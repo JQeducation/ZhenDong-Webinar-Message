@@ -3,67 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在為您跳轉至官方 LINE...</title>
+    <title>報名資料確認中</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f9f9f9; }
-        .container { text-align: center; padding: 20px; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
+        .container { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px; width: 100%; }
+        h1 { color: #06c755; margin: 0 0 15px 0; font-size: 24px; }
+        p { color: #555; line-height: 1.6; margin: 0 0 25px 0; font-size: 15px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        p { color: #555; font-size: 16px; }
+        .btn { display: block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
+        .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
+        .btn-primary:hover { background-color: #05a546; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <div id="loading" class="container">
         <div class="loader"></div>
-        <p>正在為您準備講座連結，請稍候...</p>
+        <p style="font-size: 18px; font-weight: bold; margin-top: 15px;">正在為您生成專屬直播連結...</p>
+        <p style="color: #ff4b4b; font-weight: bold; margin-top: 10px; line-height: 1.5;">
+            💡 溫馨提醒：請勿關閉本網頁！<br>
+            授權添加官方 LINE，即可獲取「專屬直播連結」
+        </p>
     </div>
 
-    <script>
-        const MyLiffId = '2009771736-ooOyR8hn'; 
-        const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; 
-        const Super8Link = 'https://s.no8.io/link/channels/oNIint5Dor'; 
-
-        let isProcessing = false;
-
-        async function main() {
-            if (isProcessing) return;
-
-            try {
-                await liff.init({ liffId: MyLiffId });
-
-                if (!liff.isLoggedIn()) {
-                    liff.login(); 
-                    return;
-                }
-
-                isProcessing = true;
-
-                const profile = await liff.getProfile();
-                const searchParams = new URLSearchParams(window.location.search);
-                const userEmail = searchParams.get('email');
-
-                // 🚩 改用 URL 參數格式傳送 (最穩定，免去 JSON 解析煩惱)
-                const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail || '')}&display_name=${encodeURIComponent(profile.displayName)}`;
-
-                // 使用 GET 請求發送，並加上 no-cors 保證不被攔截
-                await fetch(finalUrl, { 
-                    method: 'GET', 
-                    mode: 'no-cors' 
-                });
-
-                // 稍停 500ms 確保請求已發出，然後跳轉
-                setTimeout(() => {
-                    window.location.replace(Super8Link);
-                }, 500);
-
-            } catch (error) {
-                console.error('發生錯誤:', error);
-                window.location.replace(Super8Link);
-            }
-        }
-
-        main();
-    </script>
-</body>
-</html>
+    <div id="success" class="container hidden">
+        <h1>🎉 報名成功！</h1>
+        <p>您的專屬連結已準備好，請前往 LINE 領取</p>
+        
+        <a href="https://s.no8.io/link/channels/oNIint5Dor" class="btn btn-primary">💬 前往官方 LINE 領取連結</a>
+        
+        <p style="font-size: 13px; color:
