@@ -6,7 +6,7 @@
     <title>報名資料確認中</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
+        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
         .container { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px; width: 100%; }
         h1 { color: #06c755; margin: 0 0 15px 0; font-size: 24px; }
         p { color: #555; line-height: 1.6; margin: 0 0 25px 0; font-size: 15px; }
@@ -15,6 +15,7 @@
         .btn { display: block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
         .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
         .btn-primary:hover { background-color: #05a546; }
+        .btn-secondary { background-color: #e0e0e0; color: #666; font-size: 14px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -35,4 +36,63 @@
         
         <a href="https://s.no8.io/link/channels/oNIint5Dor" class="btn btn-primary">💬 前往官方 LINE 領取連結</a>
         
-        <p style="font-size: 13px; color:
+        <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 15px;">
+            💡 點擊上方按鈕後，請按下「加入」<br>
+            即可立刻收到您的直播入口！
+        </p>
+
+        <a id="watch-link" href="#" class="btn btn-secondary">👉 或直接進入直播間</a>
+    </div>
+
+    <div id="error" class="container hidden">
+        <h1 style="color:#ff4b4b;">❌ 發生錯誤</h1>
+        <p>系統連線遇到問題，請嘗試重新整理頁幕。</p>
+        <button class="btn btn-primary" onclick="window.location.reload()">重新整理</button>
+    </div>
+
+    <script>
+        // --- 🚩 設定區 🚩 ---
+        const MyLiffId = '2009771736-ooOyR8hn'; 
+        const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; 
+        // --- 🚩 設定結束 🚩 ---
+
+        async function main() {
+            try {
+                await liff.init({ liffId: MyLiffId });
+
+                if (!liff.isLoggedIn()) {
+                    liff.login({ redirectUri: window.location.href });
+                    return;
+                }
+
+                const profile = await liff.getProfile();
+                const userEmail = new URLSearchParams(window.location.search).get('email');
+
+                // 🚩 使用 GET 方式傳送，避開 CORS 限制
+                const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail || '')}&display_name=${encodeURIComponent(profile.displayName)}`;
+
+                // 發送並等待 Make 回應
+                const response = await fetch(finalUrl, { method: 'GET' });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('success').classList.remove('hidden');
+                    if(data.url) {
+                        document.getElementById('watch-link').href = data.url;
+                    }
+                } else {
+                    throw new Error('Webhook 沒回應');
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error').classList.remove('hidden');
+            }
+        }
+
+        main();
+    </script>
+</body>
+</html>
