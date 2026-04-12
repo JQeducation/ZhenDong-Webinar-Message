@@ -14,7 +14,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .btn { display: block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
         .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
-        .btn-primary:hover { background-color: #05a546; }
         .btn-secondary { background-color: #e0e0e0; color: #666; font-size: 14px; }
         .hidden { display: none; }
     </style>
@@ -26,72 +25,65 @@
         <p style="font-size: 18px; font-weight: bold; margin-top: 15px;">正在為您生成專屬直播連結...</p>
         <p style="color: #ff4b4b; font-weight: bold; margin-top: 10px; line-height: 1.5;">
             💡 溫馨提醒：請勿關閉本網頁！<br>
-            授權添加官方 LINE，即可獲取「專屬直播連結」
+            授權添加官方 LINE，即可獲獲取「專屬直播連結」
         </p>
     </div>
 
     <div id="success" class="container hidden">
         <h1>🎉 報名成功！</h1>
         <p>您的專屬連結已準備好，請前往 LINE 領取</p>
-        
         <a href="https://s.no8.io/link/channels/oNIint5Dor" class="btn btn-primary">💬 前往官方 LINE 領取連結</a>
-        
         <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 15px;">
             💡 點擊上方按鈕後，請按下「加入」<br>
             即可立刻收到您的直播入口！
         </p>
-
         <a id="watch-link" href="#" class="btn btn-secondary">👉 或直接進入直播間</a>
     </div>
 
-    <div id="error" class="container hidden">
-        <h1 style="color:#ff4b4b;">❌ 發生錯誤</h1>
-        <p>系統連線遇到問題，請嘗試重新整理頁幕。</p>
-        <button class="btn btn-primary" onclick="window.location.reload()">重新整理</button>
-    </div>
-
     <script>
-        // --- 🚩 設定區 🚩 ---
         const MyLiffId = '2009771736-ooOyR8hn'; 
         const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; 
-        // --- 🚩 設定結束 🚩 ---
+
+        function showSuccess(data) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('success').classList.remove('hidden');
+            if (data && data.url) {
+                document.getElementById('watch-link').href = data.url;
+            }
+        }
 
         async function main() {
             try {
                 await liff.init({ liffId: MyLiffId });
-
                 if (!liff.isLoggedIn()) {
                     liff.login({ redirectUri: window.location.href });
                     return;
                 }
 
                 const profile = await liff.getProfile();
-                const userEmail = new URLSearchParams(window.location.search).get('email');
+                
+                // 🚩 強化版 Email 抓取邏輯
+                const urlParams = new URLSearchParams(window.location.search);
+                const allEmails = urlParams.getAll('email');
+                let userEmail = allEmails.find(e => e !== '{email}' && e.includes('@')) || '';
+                userEmail = decodeURIComponent(userEmail).trim();
 
-                // 🚩 使用 GET 方式傳送，避開 CORS 限制
-                const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail || '')}&display_name=${encodeURIComponent(profile.displayName)}`;
+                const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail)}&display_name=${encodeURIComponent(profile.displayName)}`;
 
-                // 發送並等待 Make 回應
+                // 設定超時保險
+                const timeoutId = setTimeout(() => showSuccess(), 5000);
+
                 const response = await fetch(finalUrl, { method: 'GET' });
-
                 if (response.ok) {
+                    clearTimeout(timeoutId);
                     const data = await response.json();
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('success').classList.remove('hidden');
-                    if(data.url) {
-                        document.getElementById('watch-link').href = data.url;
-                    }
-                } else {
-                    throw new Error('Webhook 沒回應');
+                    showSuccess(data);
                 }
-
             } catch (err) {
                 console.error(err);
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('error').classList.remove('hidden');
+                showSuccess(); 
             }
         }
-
         main();
     </script>
 </body>
