@@ -66,28 +66,27 @@
                 // 3. 獲取個人資料
                 const profile = await liff.getProfile();
                 
-                // 4. 解析 Email (修正後的雙重參數抓取邏輯)
+                // 4. 解析 Email (強化篩選邏輯)
                 const urlParams = new URLSearchParams(window.location.search);
                 const allEmails = urlParams.getAll('email');
-                // 排除掉 '{email}' 文字，尋找包含 @ 的正確信箱
                 let userEmail = allEmails.find(e => e !== '{email}' && e.includes('@')) || '';
                 userEmail = decodeURIComponent(userEmail).trim();
 
                 // 5. 構建 Webhook 網址
                 const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail)}&display_name=${encodeURIComponent(profile.displayName)}`;
 
-                // 6. 發送請求至 Make.com (使用 no-cors 模式確保請求發出)
-                const response = await fetch(finalUrl, { 
+                // 6. 發送請求至 Make.com (移除 await，讓它在背景執行)
+                fetch(finalUrl, { 
                     method: 'GET',
                     mode: 'no-cors' 
                 });
 
-                // 7. 強制延遲一秒後顯示成功，給 Make.com 一點反應時間
-                setTimeout(() => showSuccess(), 1000);
+                // 7. 固定 1.5 秒後跳轉成功畫面，確保體驗流暢
+                setTimeout(() => showSuccess(), 1500);
 
             } catch (err) {
-                console.error("LIFF 執行報錯:", err);
-                // 報錯也顯示成功畫面，確保使用者可以繼續前往加好友
+                console.error("執行過程中出現錯誤:", err);
+                // 發生任何錯誤也強制跳轉，確保使用者能看到 Superlink 按鈕
                 showSuccess(); 
             }
         }
