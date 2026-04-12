@@ -25,7 +25,7 @@
         <p style="font-size: 18px; font-weight: bold; margin-top: 15px;">正在為您生成專屬直播連結...</p>
         <p style="color: #ff4b4b; font-weight: bold; margin-top: 10px; line-height: 1.5;">
             💡 溫馨提醒：請勿關閉本網頁！<br>
-            授權添加官方 LINE，即可獲獲取「專屬直播連結」
+            授權添加官方 LINE，即可獲取「專屬直播連結」
         </p>
     </div>
 
@@ -54,33 +54,40 @@
 
         async function main() {
             try {
+                // 1. 初始化 LIFF
                 await liff.init({ liffId: MyLiffId });
+
+                // 2. 檢查登入
                 if (!liff.isLoggedIn()) {
                     liff.login({ redirectUri: window.location.href });
                     return;
                 }
 
+                // 3. 獲取個人資料
                 const profile = await liff.getProfile();
                 
-                // 🚩 強化版 Email 抓取邏輯
+                // 4. 解析 Email (修正後的雙重參數抓取邏輯)
                 const urlParams = new URLSearchParams(window.location.search);
                 const allEmails = urlParams.getAll('email');
+                // 排除掉 '{email}' 文字，尋找包含 @ 的正確信箱
                 let userEmail = allEmails.find(e => e !== '{email}' && e.includes('@')) || '';
                 userEmail = decodeURIComponent(userEmail).trim();
 
+                // 5. 構建 Webhook 網址
                 const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail)}&display_name=${encodeURIComponent(profile.displayName)}`;
 
-                // 設定超時保險
-                const timeoutId = setTimeout(() => showSuccess(), 5000);
+                // 6. 發送請求至 Make.com (使用 no-cors 模式確保請求發出)
+                const response = await fetch(finalUrl, { 
+                    method: 'GET',
+                    mode: 'no-cors' 
+                });
 
-                const response = await fetch(finalUrl, { method: 'GET' });
-                if (response.ok) {
-                    clearTimeout(timeoutId);
-                    const data = await response.json();
-                    showSuccess(data);
-                }
+                // 7. 強制延遲一秒後顯示成功，給 Make.com 一點反應時間
+                setTimeout(() => showSuccess(), 1000);
+
             } catch (err) {
-                console.error(err);
+                console.error("LIFF 執行報錯:", err);
+                // 報錯也顯示成功畫面，確保使用者可以繼續前往加好友
                 showSuccess(); 
             }
         }
