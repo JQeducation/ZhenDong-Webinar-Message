@@ -20,45 +20,33 @@
     </div>
 
     <script>
-        // --- 🚩 設定區 🚩 ---
-        const MyLiffId = '2009771736-ooOyR8hn'; // 確保 O 為大寫
+        const MyLiffId = '2009771736-ooOyR8hn'; 
         const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; 
         const Super8Link = 'https://s.no8.io/link/channels/oNIint5Dor'; 
-        // --- 🚩 設定結束 🚩 ---
 
-        let isProcessing = false; // 防止重複執行的旗標
+        let isProcessing = false;
 
         async function main() {
-            // 如果已經在處理中，就直接跳出
             if (isProcessing) return;
 
             try {
-                // 1. 初始化 LIFF
                 await liff.init({ liffId: MyLiffId });
 
-                // 2. 檢查是否登入
                 if (!liff.isLoggedIn()) {
-                    // 不帶 redirectUri，讓 LIFF 自動處理回傳路徑，減少電腦端出錯率
                     liff.login(); 
                     return;
                 }
 
-                // 標記為處理中，避免後續重複執行
                 isProcessing = true;
 
-                // 3. 抓取 LINE Profile
                 const profile = await liff.getProfile();
-
-                // 4. 從網址列抓取 Email 參數
                 const searchParams = new URLSearchParams(window.location.search);
                 const userEmail = searchParams.get('email');
 
-                // 5. 將資料傳送給 Make Step 2
-                // 我們不使用 await，讓它在背景發送後直接執行跳轉，減少等待感
-                fetch(MakeWebhookUrl, {
+                // 核心改動：等待 fetch 完成，並移除 no-cors
+                await fetch(MakeWebhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    mode: 'no-cors', 
                     body: JSON.stringify({
                         line_id: profile.userId,
                         email: userEmail,
@@ -67,20 +55,18 @@
                     })
                 });
 
-                // 6. 成功發送請求後，立刻跳轉到 Superlink
-                // 使用 replace 替換目前紀錄，防止使用者按返回鍵回到此頁
+                // 資料確定發出後，稍停 500ms 讓伺服器反應，然後跳轉
                 setTimeout(() => {
                     window.location.replace(Super8Link);
-                }, 300);
+                }, 500);
 
             } catch (error) {
                 console.error('發生錯誤:', error);
-                // 即使出錯也強迫跳轉，確保使用者不卡住
+                // 出錯時保底跳轉
                 window.location.replace(Super8Link);
             }
         }
 
-        // 啟動執行
         main();
     </script>
 </body>
