@@ -6,15 +6,14 @@
     <title>報名資料確認中</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: -apple-system, "Microsoft JhengHei", sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
+        body { font-family: "Microsoft JhengHei", sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f5f5f5; padding: 20px; box-sizing: border-box; }
         .container { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px; width: 100%; }
         h1 { color: #06c755; margin: 0 0 15px 0; font-size: 24px; }
         p { color: #555; line-height: 1.6; margin: 0 0 25px 0; font-size: 15px; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .btn { display: block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
+        .btn { display: inline-block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; }
         .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
-        .btn-secondary { background-color: #e0e0e0; color: #666; font-size: 14px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -31,63 +30,59 @@
 
     <div id="success" class="container hidden">
         <h1>🎉 報名成功！</h1>
-        <p>您的專屬連結已準備好，請前往 LINE 領取</p>
+        <p>親愛的 <b id="user-name"></b>，資料已確認！</p>
         <a href="https://s.no8.io/link/channels/oNIint5Dor" class="btn btn-primary">💬 前往官方 LINE 領取連結</a>
-        <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 15px;">
-            💡 點擊上方按鈕後，請按下「加入」<br>
-            即可立刻收到您的直播入口！
+        <p style="font-size: 13px; color: #ff4b4b; font-weight: bold; margin-top: 10px;">
+            💡 點擊上方按鈕後按下「加入」<br>即可立刻收到您的直播入口！
         </p>
-        <a id="watch-link" href="#" class="btn btn-secondary">👉 或直接進入直播間</a>
     </div>
 
     <script>
+        // 設定區
         const MyLiffId = '2009771736-ooOyR8hn'; 
         const MakeWebhookUrl = 'https://hook.us2.make.com/ht42nif6a997vu5pn9wckhm5i1x6a638'; 
 
-        function showSuccess(data) {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('success').classList.remove('hidden');
-            if (data && data.url) {
-                document.getElementById('watch-link').href = data.url;
-            }
-        }
-
         async function main() {
             try {
-                // 1. 初始化 LIFF
                 await liff.init({ liffId: MyLiffId });
 
-                // 2. 檢查登入
                 if (!liff.isLoggedIn()) {
                     liff.login({ redirectUri: window.location.href });
                     return;
                 }
 
-                // 3. 獲取個人資料
                 const profile = await liff.getProfile();
-                
-                // 4. 解析 Email (強化篩選邏輯)
                 const urlParams = new URLSearchParams(window.location.search);
-                const allEmails = urlParams.getAll('email');
-                let userEmail = allEmails.find(e => e !== '{email}' && e.includes('@')) || '';
-                userEmail = decodeURIComponent(userEmail).trim();
+                
+                // 1. 抓取 WebinarKit 網址參數
+                const email = urlParams.get('email') || '';
+                const firstName = urlParams.get('first_name') || '';
 
-                // 5. 構建 Webhook 網址
-                const finalUrl = `${MakeWebhookUrl}?line_id=${encodeURIComponent(profile.userId)}&email=${encodeURIComponent(userEmail)}&display_name=${encodeURIComponent(profile.displayName)}`;
+                // 2. 顯示歡迎語
+                document.getElementById('user-name').textContent = firstName || profile.displayName;
 
-                // 6. 發送請求至 Make.com (移除 await，讓它在背景執行)
-                fetch(finalUrl, { 
-                    method: 'GET',
-                    mode: 'no-cors' 
+                // 3. 觸發 Step 2 Webhook (將 LINE ID 送去與 Step 1 寫好的資料對接)
+                fetch(MakeWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        line_id: profile.userId,
+                        display_name: profile.displayName,
+                        email: email, // 用 email 當作對接 Key
+                        first_name: firstName
+                    })
                 });
 
-                // 7. 固定 1.5 秒後跳轉成功畫面，確保體驗流暢
-                setTimeout(() => showSuccess(), 1500);
+                // 4. 固定延遲 2 秒才跳轉。這 2 秒是為了讓 Step 1 的 Webhook 有時間先跑完！
+                setTimeout(() => {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('success').classList.remove('hidden');
+                }, 2000);
 
             } catch (err) {
-                console.error("執行過程中出現錯誤:", err);
-                // 發生任何錯誤也強制跳轉，確保使用者能看到 Superlink 按鈕
-                showSuccess(); 
+                console.error(err);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('success').classList.remove('hidden');
             }
         }
         main();
