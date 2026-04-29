@@ -28,24 +28,23 @@
         .container { background: white; padding: 40px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 400px; width: 100%; }
         h1 { color: #06c755; margin: 0 0 15px 0; font-size: 24px; }
         p { color: #555; line-height: 1.6; margin: 0 0 20px 0; font-size: 15px; }
-        .btn { display: inline-block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s; margin-bottom: 10px; box-sizing: border-box; text-align: center; }
+        .btn { display: inline-block; width: 100%; padding: 15px 0; border-radius: 10px; text-decoration: none; border: none; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.3s, transform 0.2s; margin-bottom: 10px; box-sizing: border-box; text-align: center; font-family: inherit; }
         .btn-primary { background-color: #06c755; color: white; box-shadow: 0 4px 6px rgba(6, 199, 85, 0.2); }
-        .btn-primary:hover { background-color: #05a546; }
-        .btn-secondary { background-color: #f0f0f0; color: #555; border: 1px solid #ddd; }
-        .btn-secondary:hover { background-color: #e0e0e0; }
+        .btn-primary:hover { background-color: #05a546; transform: translateY(-1px); }
+        .btn-secondary { background-color: #ffffff; color: #06c755; border: 1.5px solid #06c755; }
+        .btn-secondary:hover { background-color: #f5fdf8; }
+        .btn-tertiary { background-color: #f0f0f0; color: #555; border: 1px solid #ddd; }
+        .btn-tertiary:hover { background-color: #e0e0e0; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #06c755; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .hidden { display: none; }
         .note { font-size: 12px; color: #999; margin-top: 5px; margin-bottom: 15px; }
-        .highlight-box { background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; text-align: left; }
-        .highlight-box p { margin: 0; font-size: 14px; color: #555; line-height: 1.5; }
         .warning-box { background-color: #ffebee; border-left: 4px solid #ff4b4b; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; text-align: left; }
         .warning-box p { margin: 0; font-size: 14px; color: #c62828; line-height: 1.6; font-weight: bold; }
         .big-icon { font-size: 48px; margin-bottom: 10px; line-height: 1; }
         .redirect-title { color: #06c755; font-size: 22px; font-weight: bold; margin: 15px 0 10px; }
         .ended-title { color: #555; font-size: 22px; font-weight: bold; margin: 15px 0 10px; }
 
-        /* 非好友畫面 — 新樣式 */
         .main-heading { color: #06c755; font-size: 22px; font-weight: bold; margin: 0 0 8px; line-height: 1.4; }
         .sub-heading { color: #555; font-size: 15px; font-weight: bold; margin: 0 0 6px; }
         .greeting { color: #888; font-size: 14px; margin: 0 0 24px; }
@@ -57,6 +56,8 @@
         .benefit-title { font-size: 15px; font-weight: bold; color: #333; margin: 0 0 2px; line-height: 1.4; }
         .benefit-desc { font-size: 13px; color: #888; margin: 0; line-height: 1.5; }
         .trust-note { font-size: 12px; color: #999; margin: 10px 0 0; line-height: 1.5; }
+        .btn-group-divider { height: 1px; background: #eee; margin: 16px 0 12px; border: none; }
+        .secondary-hint { font-size: 12px; color: #999; margin: 6px 0 0; line-height: 1.5; text-align: center; }
     </style>
 </head>
 <body>
@@ -70,30 +71,29 @@
         </p>
     </div>
 
-    <!-- 情境 1：已是好友 -->
-    <div id="is-friend" class="container hidden">
+    <!-- 情境 B：在 LINE App 內報名 -->
+    <div id="scenario-in-line" class="container hidden">
         <h1>🎉 報名成功！</h1>
-        <p>親愛的 <b id="name-friend"></b>，<br>報名資訊已確認，歡迎準時加入直播！</p>
+        <p>親愛的 <b id="name-in-line"></b>，<br>報名資訊已確認，歡迎準時加入直播！</p>
         <div class="warning-box">
-            <p>⚠️ 若加入官方 LINE 帳號後一分鐘，未收到專屬講座連結，請提供姓名、電話，將由專員傳送直播連結給您</p>
+            <p>⚠️ 直播連結已傳送至您的 LINE，講座開始前也會再次提醒</p>
         </div>
         <a href="https://line.me/R/oaMessage/@704rcmqj/" class="btn btn-primary">
             💬 打開 LINE 查看專屬講座連結
         </a>
     </div>
 
-    <!-- 情境 2：非好友 -->
-    <div id="not-friend" class="container hidden">
-        <h1 class="main-heading">直播連結將傳送至你的 LINE</h1>
-        <p class="sub-heading">加入 LINE 才算完成報名</p>
-        <p class="greeting">親愛的 <b id="name-notfriend"></b>，加入後你會收到：</p>
+    <!-- 情境 A：外部瀏覽器(Safari/Chrome/IG/FB)— 兩按鈕 -->
+    <div id="scenario-external" class="container hidden">
+        <h1 class="main-heading">報名成功🎉</h1>
+        <p class="sub-heading">親愛的 <b id="name-external"></b>，添加官方 LINE 可以收到：</p>
 
         <ul class="benefit-list">
             <li class="benefit-item">
                 <div class="benefit-icon">📩</div>
                 <div class="benefit-text">
                     <p class="benefit-title">專屬直播連結</p>
-                    <p class="benefit-desc">不用再回來找這個頁面</p>
+                    <p class="benefit-desc">可從 LINE 進入講座</p>
                 </div>
             </li>
             <li class="benefit-item">
@@ -107,7 +107,7 @@
                 <div class="benefit-icon">🎁</div>
                 <div class="benefit-text">
                     <p class="benefit-title">講座結束更快領取好禮</p>
-                    <p class="benefit-desc">第一時間收到課後資源</p>
+                    <p class="benefit-desc">第一時間收到獨家好禮</p>
                 </div>
             </li>
         </ul>
@@ -116,19 +116,33 @@
             加入 LINE 領取直播連結 →
         </button>
         <p class="trust-note">🔒 已有上千位同學透過 LINE 收到專屬連結，並準時上線</p>
+
+        <hr class="btn-group-divider">
+
+        <button id="direct-thankyou-btn" class="btn btn-secondary">
+            點我領取直播連結 / 進入直播間
+        </button>
+        <p class="secondary-hint">若未到講座時間，點擊會先導向講座連結頁等待</p>
     </div>
 
-    <!-- 情境 3：等待 webhook -->
+    <!-- LIFF login 進行中 -->
+    <div id="liff-logging-in" class="container hidden">
+        <div class="loader"></div>
+        <h1 style="font-size: 20px; margin-top: 15px;">正在連接 LINE...</h1>
+        <p>請稍候，馬上為您跳轉至 LINE 加好友頁</p>
+    </div>
+
+    <!-- 等待 webhook -->
     <div id="webhook-pending" class="container hidden">
         <div class="loader"></div>
-        <h1 style="font-size: 20px; margin-top: 15px;">訊息發送中...</h1>
-        <p>請切換到 LINE App 查看訊息<br>約 10 秒內會收到預約成功通知</p>
+        <h1 style="font-size: 20px; margin-top: 15px;">處理中...</h1>
+        <p>即將跳轉至 LINE 加好友頁<br>加入後將收到專屬講座連結</p>
         <p style="font-size: 13px; color: #06c755; font-weight: bold; margin-top: 10px;">
             ✅ 您已成功報名講座
         </p>
     </div>
 
-    <!-- 情境 4：LIFF 失敗 fallback -->
+    <!-- LIFF 失敗 fallback -->
     <div id="failed" class="container hidden">
         <h1>🎉 報名成功！</h1>
         <p>親愛的 <b id="name-failed"></b>，<br>您的專屬直播連結已準備好！</p>
@@ -139,12 +153,12 @@
             👉 點擊進入講座直播間
         </a>
         <p class="note">（時間到了才能進入唷！）</p>
-        <a href="https://line.me/R/ti/p/%40704rcmqj" class="btn btn-secondary">
+        <a href="https://line.me/R/ti/p/%40704rcmqj" class="btn btn-tertiary">
             💬 加入官方 LINE 掌握最新消息
         </a>
     </div>
 
-    <!-- 情境 5：講座即將開始 / 進行中,直接跳轉直播間 -->
+    <!-- 講座即將開始 / 進行中 -->
     <div id="redirecting" class="container hidden">
         <div class="big-icon">🎬</div>
         <p class="redirect-title">講座即將開始</p>
@@ -152,13 +166,13 @@
         <div class="loader"></div>
     </div>
 
-    <!-- 情境 6：講座已結束 -->
+    <!-- 講座已結束 -->
     <div id="ended" class="container hidden">
         <div class="big-icon">📅</div>
         <p class="ended-title">講座已結束</p>
-        <p>此場次已經結束，<br>請您預約其他場次</p>
+        <p>此場次已經結束，<br>歡迎報名其他場次</p>
         <a href="https://webinar.archiestudio.co/webinar/registration/69e9f0967aca8bbf033e2540" class="btn btn-primary">
-            🔄 查看其他場次
+            🔄 報名其他場次
         </a>
     </div>
 
@@ -169,16 +183,13 @@
         const WebinarBaseUrl = 'https://webinar.archiestudio.co/webinar/thankyou/69e9f0967aca8bbf033e2540/';
         const AddFriendUrl = 'https://line.me/R/ti/p/%40704rcmqj';
         const RegistrationUrl = 'https://webinar.archiestudio.co/webinar/registration/69e9f0967aca8bbf033e2540';
-        const WebhookDelayMs = 8000;
 
         // ── 講座時間設定 ──
-        // 講座開始時間自動從 URL 的 t 參數取得(毫秒 Unix timestamp)
-        // 換講座時通常只需要調整這兩個值
-        const WebinarDurationMinutes = 91;  // 講座時長(分鐘)
-        const EarlyEnterMinutes = 3;         // 開始前幾分鐘內允許直接進入
-        const RedirectDelayMs = 2000;        // 跳轉直播間前的提示停留時間(毫秒)
+        const WebinarDurationMinutes = 91;
+        const EarlyEnterMinutes = 3;
+        const RedirectDelayMs = 2000;
 
-        // ── Meta Pixel helper:安全呼叫 fbq ──
+        // ── Meta Pixel helper ──
         function trackPixelEvent(eventName) {
             try {
                 if (typeof fbq === 'function') {
@@ -245,10 +256,8 @@
             return WebinarBaseUrl + '?' + p.toString();
         }
 
-        // ── 判斷目前時間相對於講座時間的狀態 ──
         function checkWebinarTime(tParam) {
             if (!tParam) return 'unknown';
-
             const startTime = parseInt(tParam, 10);
             if (isNaN(startTime) || startTime <= 0) return 'unknown';
 
@@ -266,7 +275,7 @@
 
         async function triggerWebhook(payload, storageKey) {
             if (storageKey && localStorage.getItem(storageKey)) {
-                console.log('Webhook already sent for this session, skipping.');
+                console.log('Webhook already sent, skipping.');
                 return true;
             }
 
@@ -291,12 +300,12 @@
         function showFailed(name, webinarUrl) {
             document.getElementById('name-failed').textContent = name;
             document.getElementById('webinar-btn-failed').href = webinarUrl;
-            document.getElementById('loading').classList.add('hidden');
+            hideAll();
             document.getElementById('failed').classList.remove('hidden');
         }
 
         function showRedirectingAndGo(webinarUrl) {
-            document.getElementById('loading').classList.add('hidden');
+            hideAll();
             document.getElementById('redirecting').classList.remove('hidden');
             setTimeout(() => {
                 window.location.href = webinarUrl;
@@ -304,8 +313,57 @@
         }
 
         function showEnded() {
-            document.getElementById('loading').classList.add('hidden');
+            hideAll();
             document.getElementById('ended').classList.remove('hidden');
+        }
+
+        function hideAll() {
+            const ids = ['loading', 'scenario-in-line', 'scenario-external',
+                         'liff-logging-in', 'webhook-pending', 'failed',
+                         'redirecting', 'ended'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
+        // ── 顯示外部瀏覽器情境 A:兩按鈕畫面 ──
+        function showExternalScenario(name, params) {
+            document.getElementById('name-external').textContent = name;
+            hideAll();
+            document.getElementById('scenario-external').classList.remove('hidden');
+
+            // 主按鈕:加入 LINE → LIFF login → 拿 User ID → 跳加好友
+            document.getElementById('add-friend-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+
+                hideAll();
+                document.getElementById('liff-logging-in').classList.remove('hidden');
+
+                const cleanParams = new URLSearchParams();
+                if (params.t) cleanParams.set('t', params.t);
+                if (params.r) cleanParams.set('r', params.r);
+                if (params.firstName) cleanParams.set('first_name', params.firstName);
+                if (params.email) cleanParams.set('email', params.email);
+                if (params.phone) cleanParams.set('phone_number', params.phone);
+
+                // 用 hash 當作「剛從 LINE login 跳回來」的標記
+                // hash 跟著 URL 一起 redirect,跨瀏覽器(IG → Safari)也保留
+                // 比 sessionStorage 更穩定
+                const cleanUrl = window.location.origin + window.location.pathname
+                              + '?' + cleanParams.toString()
+                              + '#liff_done';
+
+                setTimeout(() => {
+                    liff.login({ redirectUri: cleanUrl });
+                }, 600);
+            });
+
+            // 副按鈕:直接導向 thankyou page
+            document.getElementById('direct-thankyou-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = buildWebinarUrl(params);
+            });
         }
 
         async function main() {
@@ -321,16 +379,17 @@
                     }));
                 }
 
-                // ── Meta Pixel: 首次到達此頁即視為「完成註冊」 ──
-                // 使用 r 參數判斷是否從 WebinarKit 首次跳來(LIFF 回跳只有 liff.state),
-                // 並用 sessionStorage flag 防止同 session 內重複觸發
-                const isFirstArrival = !sessionStorage.getItem('pixel_registration_fired')
-                                    && urlParams.has('r');
-                if (isFirstArrival) {
-                    trackPixelEvent('CompleteRegistration');
-                    sessionStorage.setItem('pixel_registration_fired', '1');
+                // ── Meta Pixel: 首次到達 → CompleteRegistration ──
+                const rParam = urlParams.get('r') || '';
+                if (rParam) {
+                    const pixelKey = `pixel_reg_${rParam}`;
+                    if (!localStorage.getItem(pixelKey)) {
+                        trackPixelEvent('CompleteRegistration');
+                        localStorage.setItem(pixelKey, '1');
+                    }
                 }
 
+                // ── 講座時段判斷 ──
                 const earlyParams = getParams();
                 const timeStatus = checkWebinarTime(earlyParams.t);
 
@@ -344,95 +403,85 @@
                     return;
                 }
 
-                const redirectCount = parseInt(sessionStorage.getItem('redirect_count') || '0');
-                if (redirectCount > 3) {
-                    sessionStorage.removeItem('redirect_count');
-                    const params = getParams();
-                    showFailed(params.firstName || '同學', buildWebinarUrl(params));
-                    return;
-                }
-
+                // ── LIFF init(所有外部瀏覽器都跑) ──
                 await liff.init({ liffId: MyLiffId });
 
                 const params = getParams();
+                const isInLineApp = liff.isInClient();
 
-                if (!liff.isLoggedIn()) {
-                    sessionStorage.setItem('redirect_count', String(redirectCount + 1));
+                // ╔══════════ 情境 B:在 LINE App 內報名 ══════════╗
+                if (isInLineApp) {
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                        return;
+                    }
 
-                    const cleanParams = new URLSearchParams();
-                    if (params.t) cleanParams.set('t', params.t);
-                    if (params.r) cleanParams.set('r', params.r);
-                    if (params.firstName) cleanParams.set('first_name', params.firstName);
-                    if (params.email) cleanParams.set('email', params.email);
-                    if (params.phone) cleanParams.set('phone_number', params.phone);
+                    try {
+                        const profile = await liff.getProfile();
+                        const name = params.firstName || profile.displayName;
 
-                    const cleanUrl = window.location.origin + window.location.pathname + '?' + cleanParams.toString();
+                        const payload = {
+                            line_id: profile.userId,
+                            display_name: profile.displayName,
+                            email: params.email,
+                            first_name: params.firstName,
+                            r: params.r
+                        };
+                        const storageKey = `webhook_sent_${params.r || profile.userId}`;
 
-                    // ⏱ 停留 2.5 秒,讓使用者看清楚「待會請點擊使用 LINE 應用程式登入」的提示
-                    await new Promise(resolve => setTimeout(resolve, 2500));
+                        triggerWebhook(payload, storageKey);
 
-                    liff.login({ redirectUri: cleanUrl });
+                        document.getElementById('name-in-line').textContent = name;
+                        hideAll();
+                        document.getElementById('scenario-in-line').classList.remove('hidden');
+                    } catch (e) {
+                        console.error('In-LINE flow error:', e);
+                        showFailed(params.firstName || '同學', buildWebinarUrl(params));
+                    }
                     return;
                 }
 
-                sessionStorage.removeItem('redirect_count');
+                // ╔══════════ 情境 A:外部瀏覽器(包含 IG/FB/Safari/Chrome) ══════════╗
 
-                const postLoginStatus = checkWebinarTime(params.t);
-                if (postLoginStatus === 'during') {
-                    showRedirectingAndGo(buildWebinarUrl(params));
-                    return;
-                }
-                if (postLoginStatus === 'ended') {
-                    showEnded();
-                    return;
-                }
+                // 用 hash 判斷是否「剛從 LIFF login 跳回來」
+                // hash 跟著 redirect 走,跨瀏覽器(IG → Safari 接力)也保留
+                const justLoggedIn = window.location.hash === '#liff_done';
 
-                const profile = await liff.getProfile();
-                const name = params.firstName || profile.displayName;
+                if (liff.isLoggedIn() && justLoggedIn) {
+                    // 真的剛從 LINE login 回來,觸發 Step2 後跳加好友
+                    // 清掉 hash 避免重新整理時誤判
+                    history.replaceState(null, '',
+                        window.location.pathname + window.location.search);
 
-                const payload = {
-                    line_id: profile.userId,
-                    display_name: profile.displayName,
-                    email: params.email,
-                    first_name: params.firstName,
-                    r: params.r
-                };
-                const storageKey = `webhook_sent_${params.r || profile.userId}`;
+                    try {
+                        const profile = await liff.getProfile();
+                        const payload = {
+                            line_id: profile.userId,
+                            display_name: profile.displayName,
+                            email: params.email,
+                            first_name: params.firstName,
+                            r: params.r
+                        };
+                        const storageKey = `webhook_sent_${params.r || profile.userId}`;
 
-                let isFriend = false;
-                try {
-                    const friendship = await liff.getFriendship();
-                    isFriend = friendship.friendFlag;
-                } catch(e) {
-                    console.error('Friendship check failed:', e);
-                    isFriend = false;
-                }
-
-                if (isFriend) {
-                    document.getElementById('name-friend').textContent = name;
-                    document.getElementById('is-friend').classList.remove('hidden');
-                    document.getElementById('loading').classList.add('hidden');
-                    triggerWebhook(payload, storageKey);
-                } else {
-                    document.getElementById('name-notfriend').textContent = name;
-                    document.getElementById('not-friend').classList.remove('hidden');
-                    document.getElementById('loading').classList.add('hidden');
-
-                    document.getElementById('add-friend-btn').addEventListener('click', function(e) {
-                        e.preventDefault();
-
-                        setTimeout(() => {
-                            triggerWebhook(payload, storageKey);
-                        }, WebhookDelayMs);
-
-                        document.getElementById('not-friend').classList.add('hidden');
+                        hideAll();
                         document.getElementById('webhook-pending').classList.remove('hidden');
+
+                        triggerWebhook(payload, storageKey);
 
                         setTimeout(() => {
                             window.location.href = AddFriendUrl;
-                        }, 100);
-                    });
+                        }, 1200);
+                    } catch (e) {
+                        console.error('Post-login flow error:', e);
+                        showFailed(params.firstName || '同學', buildWebinarUrl(params));
+                    }
+                    return;
                 }
+
+                // 其他情況(未登入 / 已登入但非剛 login):顯示兩按鈕畫面
+                const name = params.firstName || '同學';
+                showExternalScenario(name, params);
 
             } catch (err) {
                 console.error('Main flow error:', err);
