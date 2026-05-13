@@ -58,6 +58,15 @@
         .trust-note { font-size: 12px; color: #999; margin: 10px 0 0; line-height: 1.5; }
         .btn-group-divider { height: 1px; background: #eee; margin: 16px 0 12px; border: none; }
         .secondary-hint { font-size: 12px; color: #999; margin: 6px 0 0; line-height: 1.5; text-align: center; }
+
+        /* === 新版 scenario-external 樣式 === */
+        .top-heading { color: #06c755; font-size: 24px; font-weight: bold; text-align: center; text-wrap: balance; margin: 0 0 24px; letter-spacing: 0.5px; }
+        .email-box { background-color: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 14px 14px 14px 16px; display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
+        .email-box-icon { font-size: 22px; line-height: 1.2; flex-shrink: 0; }
+        .email-box-content { flex: 1; text-align: left; }
+        .email-box-title { font-size: 14px; font-weight: bold; color: #92400e; margin: 0 0 3px; line-height: 1.4; }
+        .email-box-desc { font-size: 13px; color: #78350f; line-height: 1.55; margin: 0; text-wrap: pretty; }
+        .section-spacer { height: 24px; }
     </style>
 </head>
 <body>
@@ -83,46 +92,33 @@
         </a>
     </div>
 
-    <!-- 情境 A：外部瀏覽器(Safari/Chrome/IG/FB)— 兩按鈕 -->
+    <!-- 情境 A：外部瀏覽器(Safari/Chrome/IG/FB)— 新版三區設計 -->
     <div id="scenario-external" class="container hidden">
-        <h1 class="main-heading">報名成功🎉</h1>
-        <p class="sub-heading">您好 <b id="name-external"></b>，添加官方 LINE 可以收到：</p>
+        <!-- 頂部 -->
+        <h1 class="top-heading">報名成功 🎉</h1>
 
-        <ul class="benefit-list">
-            <li class="benefit-item">
-                <div class="benefit-icon">📩</div>
-                <div class="benefit-text">
-                    <p class="benefit-title">專屬直播連結</p>
-                    <p class="benefit-desc">可從 LINE 進入講座</p>
-                </div>
-            </li>
-            <li class="benefit-item">
-                <div class="benefit-icon">⏰</div>
-                <div class="benefit-text">
-                    <p class="benefit-title">講座開始前提醒</p>
-                    <p class="benefit-desc">避免錯過開播時間</p>
-                </div>
-            </li>
-            <li class="benefit-item">
-                <div class="benefit-icon">🎁</div>
-                <div class="benefit-text">
-                    <p class="benefit-title">講座結束更快領取好禮</p>
-                    <p class="benefit-desc">第一時間收到獨家好禮</p>
-                </div>
-            </li>
-        </ul>
+        <!-- 上區域:email warning box -->
+        <div class="email-box">
+            <div class="email-box-icon">📬</div>
+            <div class="email-box-content">
+                <p class="email-box-title">請至信箱收取報名通知</p>
+                <p class="email-box-desc">您好 <b id="name-external"></b>，講座連結與課前提醒將寄至您報名時填寫的 Email，請您到信箱確認收件。</p>
+            </div>
+        </div>
 
+        <!-- 中區域:加入 LINE 按鈕 -->
         <button id="add-friend-btn" class="btn btn-primary">
             加入 LINE 領取直播連結 →
         </button>
-        <p class="trust-note">🔒 已有上千位同學透過 LINE 收到專屬連結，並準時上線</p>
+        <p class="trust-note">🔒 加入後，講座時間到也會通過 LINE 提醒</p>
 
-        <hr class="btn-group-divider">
+        <div class="section-spacer"></div>
 
+        <!-- 下區域:直播間按鈕 -->
         <button id="direct-thankyou-btn" class="btn btn-secondary">
             點我領取直播連結 / 進入直播間
         </button>
-        <p class="secondary-hint">若未到講座時間，直播間不會開啟喔～</p>
+        <p class="secondary-hint">講座時間到了，才會開啟直播間喔～</p>
     </div>
 
     <!-- LIFF login 進行中 -->
